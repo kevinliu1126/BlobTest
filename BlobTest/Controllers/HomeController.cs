@@ -4,6 +4,8 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using BlobTest.Services.Abstract;
+using BlobTest.Models;
+
 
 namespace BlobTest.Controllers
 {
@@ -58,7 +60,7 @@ namespace BlobTest.Controllers
             }
             else if(_loginService.SendinfoToSQL(email, password))
             {
-                return RedirectToAction("Index");
+                return RedirectToAction("Upload");
             }
             else
             {
@@ -74,11 +76,32 @@ namespace BlobTest.Controllers
             int? permission = (int?)httpContext.Session["permission"];
             if (email == null || password == null || permission == null)
             {
-                return View();
+                return RedirectToAction("Index");
             }
             else
             {
-                return View();
+                var model = new UploadFileModel();
+                return View(model);
+            }
+        }
+
+        public ActionResult SaveData(UploadFileModel fileModel)
+        {
+            HttpContextBase httpContext = ControllerContext.HttpContext;
+            string email = httpContext.Session["email"] as string;
+            string password = httpContext.Session["password"] as string;
+            int? permission = (int?)httpContext.Session["permission"];
+            if (email == null || password == null || permission == null)
+            {
+                return RedirectToAction("Index");
+            }
+            else if(fileModel.File == null || fileModel.File.FileName == null)
+            {
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                return RedirectToAction("Upload");
             }
         }
     }

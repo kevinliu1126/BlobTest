@@ -1,0 +1,8 @@
+﻿.upload-form {
+    text-align: center;
+}
+
+.upload-form input[type="file"] {
+    display: inline-block;
+    margin-right: 10px;
+}

@@ -1,17 +1,34 @@
-﻿@{
-    Layout = null;
+﻿@model BlobTest.Models.UploadFileModel
+@{
+    ViewData["Title"] = "Upload Page";
 }
 
-<!DOCTYPE html>
+<style>
+    .upload-form {
+        text-align: center;
+    }
 
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title></title>
-</head>
-<body>
-    <div>
-    
-    </div>
-</body>
-</html>
+    .upload-form input[type="file"] {
+        display: inline-block;
+        margin-right: 10px;
+    }
+</style>
+
+<div class="text-center">
+    <h1 class="display-4">Upload here</h1>
+
+    @using (Html.BeginForm("SaveData", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-group">
+
+            @Html.LabelFor(m => m.FileDetails, new { @class = "form-control" })
+            <div class="upload-form">
+                <input type="file" name="File" class="form-control" />
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    }
+
+</div>
