@@ -5,18 +5,19 @@ using System.Web;
 using System.Web.Mvc;
 using BlobTest.Services.Abstract;
 using BlobTest.Models;
-
+using System.Threading.Tasks;
 
 namespace BlobTest.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILoginService _loginService;
+        private readonly IUploadService _uploadService;
 
-        public HomeController(ILoginService loginService)
+        public HomeController(ILoginService loginService, IUploadService uploadService)
         {
             _loginService = loginService;
-
+            _uploadService = uploadService;
         }
 
         public ActionResult Index()
@@ -85,7 +86,7 @@ namespace BlobTest.Controllers
             }
         }
 
-        public ActionResult SaveData(UploadFileModel fileModel)
+        public async Task<ActionResult> SaveData(UploadFileModel fileModel)
         {
             HttpContextBase httpContext = ControllerContext.HttpContext;
             string email = httpContext.Session["email"] as string;
@@ -101,6 +102,7 @@ namespace BlobTest.Controllers
             }
             else
             {
+                await _uploadService.UploadFileAsync(fileModel.File, httpContext);
                 return RedirectToAction("Upload");
             }
         }

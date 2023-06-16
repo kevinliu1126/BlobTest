@@ -146,3 +146,13 @@ D:\VS_project\BlobTest\BlobTest\bin\Unity.Abstractions.pdb
 D:\VS_project\BlobTest\BlobTest\bin\Unity.Container.pdb
 D:\VS_project\BlobTest\BlobTest\bin\Unity.Mvc.pdb
 D:\VS_project\BlobTest\BlobTest\bin\Unity.Mvc.xml
+D:\VS_project\BlobTest\BlobTest\bin\Azure.Core.dll
+D:\VS_project\BlobTest\BlobTest\bin\Azure.Storage.Blobs.dll
+D:\VS_project\BlobTest\BlobTest\bin\Azure.Storage.Common.dll
+D:\VS_project\BlobTest\BlobTest\bin\Microsoft.Bcl.AsyncInterfaces.dll
+D:\VS_project\BlobTest\BlobTest\bin\System.Diagnostics.DiagnosticSource.dll
+D:\VS_project\BlobTest\BlobTest\bin\Azure.Core.xml
+D:\VS_project\BlobTest\BlobTest\bin\Azure.Storage.Blobs.xml
+D:\VS_project\BlobTest\BlobTest\bin\Azure.Storage.Common.xml
+D:\VS_project\BlobTest\BlobTest\bin\Microsoft.Bcl.AsyncInterfaces.xml
+D:\VS_project\BlobTest\BlobTest\bin\System.Diagnostics.DiagnosticSource.xml
