@@ -13,11 +13,13 @@ namespace BlobTest.Controllers
     {
         private readonly ILoginService _loginService;
         private readonly IUploadService _uploadService;
+        private readonly IGetFileService _getfileService;
 
-        public HomeController(ILoginService loginService, IUploadService uploadService)
+        public HomeController(ILoginService loginService, IUploadService uploadService, IGetFileService getfileService)
         {
             _loginService = loginService;
             _uploadService = uploadService;
+            _getfileService = getfileService;
         }
 
         public ActionResult Index()
@@ -104,6 +106,23 @@ namespace BlobTest.Controllers
             {
                 await _uploadService.UploadFileAsync(fileModel.File, httpContext);
                 return RedirectToAction("Upload");
+            }
+        }
+
+        public ActionResult ViewFile()
+        {
+            HttpContextBase httpContext = ControllerContext.HttpContext;
+            string email = httpContext.Session["email"] as string;
+            string password = httpContext.Session["password"] as string;
+            int? permission = (int?)httpContext.Session["permission"];
+            if (email == null || password == null || permission == null)
+            {
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                ViewBag.Files = _getfileService.GetFiles((int)permission, httpContext);
+                return View();
             }
         }
     }

@@ -1,0 +1,28 @@
+﻿@{
+    ViewData["Title"] = "File page";
+}
+<body>
+    <h1>@ViewData["Title"]</h1>
+    <table style=" width: 75%;">
+        <thead><tr><th>ID</th><th>Name</th><th>input time</th><th>download</th></tr></thead>
+        <tbody>
+            @foreach (var file in ViewBag.Files)
+            {
+                <tr>
+                    <td>
+                        @file.File_ID
+                    </td>
+                    <td>
+                        @file.Filename
+                    </td>
+                    <td>
+                        @file.Input_time
+                    </td>
+                    <td>
+                        <a href="@Url.Action("Download", "Home", new { file = file.Filename, save = file.Save_name })">download</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</body>

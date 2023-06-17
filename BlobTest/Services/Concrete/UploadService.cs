@@ -16,9 +16,8 @@ namespace BlobTest.Services.Concrete
     public class UploadService : IUploadService
     {
 
-        public string SetcontentType(string fileExtension)
+        public string SetContainer(string fileExtension)
         {
-            // Set the correct content type based on the file extension
             string Container;
             switch (fileExtension)
             {
@@ -68,7 +67,6 @@ namespace BlobTest.Services.Concrete
                                       $"password={password};" +
                                       $"database={database};";
             MySqlConnection conn = new MySqlConnection(connectionString);
-            conn.ConnectionString = connectionString;
             if (conn.State != ConnectionState.Open)
                 conn.Open();
             string sql = $"INSERT INTO `file`(`filename`, `email`, `savename`) VALUES ('{fileName}', '{email}', '{uniqueName}')";
@@ -94,41 +92,15 @@ namespace BlobTest.Services.Concrete
             {
                 return;
             }
-            string Container = SetcontentType(fileExtension);
+            string Container = SetContainer(fileExtension);
             string ConnectionString = ConfigurationManager.AppSettings["AzureConnectionString"];
             var uniqueName = Guid.NewGuid().ToString() + fileExtension;
-            //string content;
-            //string filePath = file.FileName;
-            // 创建 BlobServiceClient
             BlobServiceClient blobServiceClient = new BlobServiceClient(ConnectionString);
-
-            // 获取 BlobContainerClient
             BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(Container);
-
-            // 获取 BlobClient
-            //BlobClient blobClient = containerClient.GetBlobClient(uniqueName);
-
-            // 生成 Blob 名称（可以根据您的需求进行命名）
-
-            // 将文件内容上传到 Blob
             using (Stream fileStream = file.InputStream)
             {
                 await containerClient.UploadBlobAsync(uniqueName, fileStream);
             }
-
-            /*BlobContainerClient blobContainerClient = new BlobContainerClient(
-                _azureOptions.ConnectionString,
-                _azureOptions.Container);
-            var uniqueName = Guid.NewGuid().ToString() + fileExtension;
-            BlobClient blobClient = blobContainerClient.GetBlobClient(uniqueName);
-
-            blobClient.Upload(file.InputStream, new BlobUploadOptions()
-            {
-                HttpHeaders = new BlobHttpHeaders
-                {
-                    ContentType = contentType
-                }
-            }, cancellationToken: default);*/
             UploadFileToMySQL(file.FileName, email, uniqueName);
 
         }
