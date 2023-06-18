@@ -99,7 +99,7 @@ namespace BlobTest.Services.Concrete
             BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(Container);
             using (Stream fileStream = file.InputStream)
             {
-                await containerClient.UploadBlobAsync(uniqueName, fileStream);
+                var response = await containerClient.UploadBlobAsync(uniqueName, fileStream);
             }
             UploadFileToMySQL(file.FileName, email, uniqueName);
 

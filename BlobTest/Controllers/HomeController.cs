@@ -6,6 +6,8 @@ using System.Web.Mvc;
 using BlobTest.Services.Abstract;
 using BlobTest.Models;
 using System.Threading.Tasks;
+using System.Net;
+using System.IO;
 
 namespace BlobTest.Controllers
 {
@@ -14,12 +16,14 @@ namespace BlobTest.Controllers
         private readonly ILoginService _loginService;
         private readonly IUploadService _uploadService;
         private readonly IGetFileService _getfileService;
+        private readonly IDownloadService _downloadService;
 
-        public HomeController(ILoginService loginService, IUploadService uploadService, IGetFileService getfileService)
+        public HomeController(ILoginService loginService, IUploadService uploadService, IGetFileService getfileService, IDownloadService downloadService)
         {
             _loginService = loginService;
             _uploadService = uploadService;
             _getfileService = getfileService;
+            _downloadService = downloadService;
         }
 
         public ActionResult Index()
@@ -123,6 +127,44 @@ namespace BlobTest.Controllers
             {
                 ViewBag.Files = _getfileService.GetFiles((int)permission, httpContext);
                 return View();
+            }
+        }
+
+        public async Task<ActionResult> Download(string file, string save) 
+        {
+            HttpContextBase httpContext = ControllerContext.HttpContext;
+            string email = httpContext.Session["email"] as string;
+            string password = httpContext.Session["password"] as string;
+            int? permission = (int?)httpContext.Session["permission"];
+            if (email == null || password == null || permission == null)
+            {
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                string url = _downloadService.Downloadfile(save);
+                string filePath = $@"D:\NJ\file\" + _downloadService.GetContainername(file) + @"\" + file;
+
+                if (!System.IO.File.Exists(filePath))
+                {
+                    using (WebClient wc = new WebClient())
+                    {
+                        wc.DownloadFile(url, filePath);
+                    }
+                }
+
+                if (!System.IO.File.Exists(filePath))
+                {
+                    return HttpNotFound();
+                }
+
+                var memoryStream = new MemoryStream();
+                using (var stream = new FileStream(filePath, FileMode.Open))
+                {
+                    await stream.CopyToAsync(memoryStream);
+                }
+                memoryStream.Seek(0, SeekOrigin.Begin);
+                return File(memoryStream, "application/octet-stream", Path.GetFileName(filePath));
             }
         }
     }
