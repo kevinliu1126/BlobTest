@@ -230,10 +230,12 @@
     <Compile Include="Models\GetFileModel.cs" />
     <Compile Include="Models\UploadFileModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\Abstract\IDeleteService.cs" />
     <Compile Include="Services\Abstract\IDownloadService.cs" />
     <Compile Include="Services\Abstract\IGetFileService.cs" />
     <Compile Include="Services\Abstract\ILoginService.cs" />
     <Compile Include="Services\Abstract\IUploadService.cs" />
+    <Compile Include="Services\Concrete\DeleteService.cs" />
     <Compile Include="Services\Concrete\DownloadService.cs" />
     <Compile Include="Services\Concrete\GetFileService.cs" />
     <Compile Include="Services\Concrete\LoginService.cs" />

@@ -4,7 +4,7 @@ namespace BlobTest.Services.Concrete
 {
     public class DownloadService : IDownloadService
     {
-        public string Downloadfile(string filename)
+        public string GetDownloadURL(string filename)
         {
             string fileExtension = filename.Split('.')[1];
             string url;

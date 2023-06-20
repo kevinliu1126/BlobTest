@@ -28,6 +28,7 @@ namespace BlobTest
             container.RegisterType<IUploadService, UploadService>();
             container.RegisterType<IGetFileService, GetFileService>();
             container.RegisterType<IDownloadService, DownloadService>();
+            container.RegisterType<IDeleteService, DeleteService>();
 
             DependencyResolver.SetResolver(new UnityDependencyResolver(container));
         }

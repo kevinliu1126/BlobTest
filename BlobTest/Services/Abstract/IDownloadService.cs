@@ -2,7 +2,7 @@
 {
     public interface IDownloadService
     {
-        string Downloadfile(string filename);
+        string GetDownloadURL(string filename);
 
         string GetContainername(string filename);
     }

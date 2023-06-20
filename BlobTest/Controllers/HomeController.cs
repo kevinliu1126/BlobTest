@@ -17,13 +17,15 @@ namespace BlobTest.Controllers
         private readonly IUploadService _uploadService;
         private readonly IGetFileService _getfileService;
         private readonly IDownloadService _downloadService;
+        private readonly IDeleteService _deleteService;
 
-        public HomeController(ILoginService loginService, IUploadService uploadService, IGetFileService getfileService, IDownloadService downloadService)
+        public HomeController(ILoginService loginService, IUploadService uploadService, IGetFileService getfileService, IDownloadService downloadService, IDeleteService deleteService)
         {
             _loginService = loginService;
             _uploadService = uploadService;
             _getfileService = getfileService;
             _downloadService = downloadService;
+            _deleteService = deleteService;
         }
 
         public ActionResult Index()
@@ -65,7 +67,7 @@ namespace BlobTest.Controllers
             {
                 return RedirectToAction("Index");
             }
-            else if(_loginService.SendinfoToSQL(email, password))
+            else if (_loginService.SendinfoToSQL(email, password))
             {
                 return RedirectToAction("Upload");
             }
@@ -102,7 +104,7 @@ namespace BlobTest.Controllers
             {
                 return RedirectToAction("Index");
             }
-            else if(fileModel.File == null || fileModel.File.FileName == null)
+            else if (fileModel.File == null || fileModel.File.FileName == null)
             {
                 return RedirectToAction("Index");
             }
@@ -130,7 +132,7 @@ namespace BlobTest.Controllers
             }
         }
 
-        public async Task<ActionResult> Download(string file, string save) 
+        public async Task<ActionResult> Download(string file, string save)
         {
             HttpContextBase httpContext = ControllerContext.HttpContext;
             string email = httpContext.Session["email"] as string;
@@ -142,7 +144,7 @@ namespace BlobTest.Controllers
             }
             else
             {
-                string url = _downloadService.Downloadfile(save);
+                string url = _downloadService.GetDownloadURL(save);
                 string filePath = $@"D:\NJ\file\" + _downloadService.GetContainername(file) + @"\" + file;
 
                 if (!System.IO.File.Exists(filePath))
@@ -165,6 +167,24 @@ namespace BlobTest.Controllers
                 }
                 memoryStream.Seek(0, SeekOrigin.Begin);
                 return File(memoryStream, "application/octet-stream", Path.GetFileName(filePath));
+            }
+        }
+
+        public ActionResult Delete(string save)
+        {
+            HttpContextBase httpContext = ControllerContext.HttpContext;
+            string email = httpContext.Session["email"] as string;
+            string password = httpContext.Session["password"] as string;
+            int? permission = (int?)httpContext.Session["permission"];
+            if (email == null || password == null || permission == null)
+            {
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                _deleteService.DeleteFileBlob(save);
+                _deleteService.DeleteFileSQL(save);
+                return RedirectToAction("ViewFile");
             }
         }
     }

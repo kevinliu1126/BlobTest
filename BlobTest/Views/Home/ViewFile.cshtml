@@ -21,6 +21,9 @@
                     <td>
                         <a href="@Url.Action("Download", "Home", new { file = file.Filename, save = file.Save_name })">download</a>
                     </td>
+                    <td>
+                        <a href="@Url.Action("Delete", "Home", new { file = file.Filename, save = file.Save_name })">Delete</a>
+                    </td>
                 </tr>
             }
         </tbody>
