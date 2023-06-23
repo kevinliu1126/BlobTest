@@ -10,6 +10,10 @@ using System;
 using System.Web;
 using System.IO;
 using System.Threading.Tasks;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Collections.Generic;
 
 namespace BlobTest.Services.Concrete
 {
@@ -83,6 +87,43 @@ namespace BlobTest.Services.Concrete
             conn.Close();
         }
 
+        public static string ComputeSHA2Hash(HttpPostedFileBase file)
+        {
+            using (var sha256 = SHA256.Create())
+            {
+                byte[] hashBytes = sha256.ComputeHash(file.InputStream);
+                string hashString = BitConverter.ToString(hashBytes).Replace("-", string.Empty);
+                return hashString;
+            }
+        }
+
+        public async Task<bool> CompareSHA(string SHA, BlobContainerClient containerClient)
+        {
+            foreach (BlobItem blobItem in containerClient.GetBlobs())
+            {
+                BlobClient blobClient = containerClient.GetBlobClient(blobItem.Name);
+                BlobProperties properties = await blobClient.GetPropertiesAsync();
+                IDictionary<string, string> metadata = properties.Metadata;
+
+                Console.WriteLine($"Blob: {blobItem.Name}");
+
+                // 獲取 Metadata 鍵值對
+                foreach (var item in metadata)
+                {
+                    string key = item.Key;
+                    string value = item.Value;
+                    if(key == "SHA")
+                    {
+                        if(value == SHA)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
         public async Task UploadFileAsync(HttpPostedFileBase file, HttpContextBase httpContext)
         {
             string fileExtension = Path.GetExtension(file.FileName);
@@ -97,12 +138,28 @@ namespace BlobTest.Services.Concrete
             var uniqueName = Guid.NewGuid().ToString() + fileExtension;
             BlobServiceClient blobServiceClient = new BlobServiceClient(ConnectionString);
             BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(Container);
-            using (Stream fileStream = file.InputStream)
+            string SHA = ComputeSHA2Hash(file);
+            Task<bool> SHAexist = CompareSHA(SHA, containerClient);
+            if(await SHAexist)
             {
-                var response = await containerClient.UploadBlobAsync(uniqueName, fileStream);
+                Console.WriteLine("File content exist!!!");
             }
-            UploadFileToMySQL(file.FileName, email, uniqueName);
+            else
+            {
+                using (Stream fileStream = file.InputStream)
+                {
+                    var response = await containerClient.UploadBlobAsync(uniqueName, fileStream);
+                }
+                var blobClient = containerClient.GetBlobClient(uniqueName);
 
+                IDictionary<string, string> metadata = new Dictionary<string, string>
+                {
+                    { "SHA", SHA }
+                };
+
+                await blobClient.SetMetadataAsync(metadata);
+                UploadFileToMySQL(file.FileName, email, uniqueName);
+            }
         }
     }
 }
