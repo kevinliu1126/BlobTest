@@ -26,7 +26,7 @@ namespace BlobTest.Services.Concrete
             MySqlConnection conn = new MySqlConnection(connectionString);
             if (conn.State != ConnectionState.Open)
                 conn.Open();
-            string sql = $"SELECT `file_ID`, `filename`, `input_time`, `savename` FROM `file` NATURAL JOIN `account` WHERE `account`.`permission` >= {permission}";
+            string sql = $"SELECT `file_ID`, `filename`, `input_time`, `email`, `savename` FROM `file` NATURAL JOIN `account` WHERE `account`.`permission` >= {permission}";
             MySqlCommand cmd = new MySqlCommand(sql, conn);
             MySqlDataReader reader = cmd.ExecuteReader();
             var files = new List<GetFileModel>();
@@ -39,7 +39,8 @@ namespace BlobTest.Services.Concrete
                         File_ID = reader.GetInt32(0),
                         Filename = reader.GetString(1),
                         Input_time = reader.GetDateTime(2),
-                        Save_name = reader.GetString(3),
+                        email = reader.GetString(3),
+                        Save_name = reader.GetString(4),
                     });
                 }
             }

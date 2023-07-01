@@ -7,6 +7,7 @@ namespace BlobTest.Models
         public int File_ID { get; set; }
         public string Filename { get; set; }
         public DateTime Input_time { get; set; }
+        public string email { get; set; }
         public string Save_name { get; set; }
     }
 }

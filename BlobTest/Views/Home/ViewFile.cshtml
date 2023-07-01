@@ -4,7 +4,7 @@
 <body>
     <h1>@ViewData["Title"]</h1>
     <table style=" width: 75%;">
-        <thead><tr><th>ID</th><th>Name</th><th>input time</th><th>download</th></tr></thead>
+        <thead><tr><th>ID</th><th>Name</th><th>Input time</th><th>Upload User</th><th>Download</th><th>Delete</th></tr></thead>
         <tbody>
             @foreach (var file in ViewBag.Files)
             {
@@ -17,6 +17,9 @@
                     </td>
                     <td>
                         @file.Input_time
+                    </td>
+                    <td>
+                        @file.email
                     </td>
                     <td>
                         <a href="@Url.Action("Download", "Home", new { file = file.Filename, save = file.Save_name })">download</a>

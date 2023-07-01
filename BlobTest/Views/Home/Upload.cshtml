@@ -8,16 +8,16 @@
         text-align: center;
     }
 
-    .upload-form input[type="file"] {
-        display: inline-block;
-        margin-right: 10px;
-    }
+        .upload-form input[type="file"] {
+            display: inline-block;
+            margin-right: 10px;
+        }
 </style>
 
 <div class="text-center">
     <h1 class="display-4">Upload here</h1>
 
-    @using (Html.BeginForm("SaveData", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    @using (Html.BeginForm("SaveData", "Home", FormMethod.Post, new { enctype = "multipart/form-data", onsubmit = "return confirmOverwrite(event);" }))
     {
         @Html.AntiForgeryToken()
 
@@ -32,3 +32,34 @@
     }
 
 </div>
+
+<script>
+    async function confirmOverwrite(event) {
+        event.preventDefault();
+        var fileInput = document.getElementsByName('File')[0];
+        var file = fileInput.files[0];
+        var fileName = file.name;
+
+        try {
+            var response = await $.ajax({
+                url: '/Home/CheckFileExistence',
+                type: 'POST',
+                data: { fileName: fileName },
+            });
+
+            if (response.exists != null) {
+                var confirmed = confirm('文件已存在，是否覆盖？');
+                if (confirmed) {
+                    event.target.submit(); // 提交表单
+                }
+            } else {
+                event.target.submit(); // 提交表单
+            }
+        } catch (error) {
+            console.log("ERROR");
+        }
+    }
+</script>
+
+
+

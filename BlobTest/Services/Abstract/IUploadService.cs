@@ -2,13 +2,15 @@
 using System.Threading.Tasks;
 using Azure.Storage.Blobs;
 using System.IO;
+using System;
 
 namespace BlobTest.Services.Abstract
 {
     public interface IUploadService
     {
+        string FileExist(string filename, string email);
         Task UploadFileAsync(HttpPostedFileBase file, HttpContextBase httpContext);
-        string SetContainer(string fileExtension);
-        Task<bool> CompareSHA(string SHA, BlobContainerClient containerClient);
+        Tuple<string, int> SetContainer(string fileExtension);
+        Task<string> CompareSHA(string SHA, BlobContainerClient containerClient);
     }
 }

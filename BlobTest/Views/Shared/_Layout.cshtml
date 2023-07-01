@@ -1,4 +1,10 @@
-﻿<!DOCTYPE html>
+﻿@{ 
+    var sessionValue = (int?)HttpContext.Current.Session["permission"];
+    string email = HttpContext.Current.Session["email"] as string;
+    string password = HttpContext.Current.Session["password"] as string;
+}
+
+<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
@@ -26,6 +32,12 @@
                     <li>@Html.ActionLink("About", "About", "Home")</li>
                     <li>@Html.ActionLink("Contact us", "Contact", "Home")</li>
                 </ul>
+                @if (sessionValue == 1)
+                {
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>@Html.ActionLink("Azure Storage Management", "AzureManagement", "Home")</li>
+                    </ul>
+                }
             </div>
         </div>
     </div>
@@ -33,8 +45,15 @@
         @RenderBody()
         <hr />
         <footer>
-            <p>&copy; @DateTime.Now.Year - 我的 ASP.NET 應用程式</p>
+            <div class="container">
+                <div style="display:inline-block"><p>&copy; @DateTime.Now.Year - 我的 ASP.NET 應用程式</p></div>
+                @if(email != null && password != null)
+                {
+                    <div style="display:inline-block; float:right">@Html.ActionLink("LogOut", "Logout", "Home")</div>
+                }
+            </div>
         </footer>
+
     </div>
 
     @Scripts.Render("~/bundles/jquery")

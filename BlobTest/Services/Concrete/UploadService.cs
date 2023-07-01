@@ -14,51 +14,50 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Collections.Generic;
+using System.Drawing;
 
 namespace BlobTest.Services.Concrete
 {
     public class UploadService : IUploadService
     {
 
-        public string SetContainer(string fileExtension)
+        public Tuple<string, int> SetContainer(string fileExtension)
         {
             string Container;
+            int SQLcontainer;
             switch (fileExtension)
             {
                 case ".png":
-                    Container = "blobcontainer1";
-                    break;
                 case ".jpg":
                 case ".jpeg":
                     Container = "blobcontainer1";
+                    SQLcontainer = 1;
                     break;
                 case ".doc":
-                    Container = "blobcontainer2";
-                    break;
                 case ".docx":
-                    Container = "blobcontainer2";
-                    break;
                 case ".pdf":
                     Container = "blobcontainer2";
+                    SQLcontainer = 2;
                     break;
                 case ".xls":
-                    Container = "blobcontainer3";
-                    break;
                 case ".xlsx":
                     Container = "blobcontainer3";
+                    SQLcontainer = 3;
                     break;
                 case ".json":
                     Container = "blobcontainer4";
+                    SQLcontainer = 4;
                     break;
                 default:
                     Container = "blobcontainer5";
+                    SQLcontainer = 5;
                     break;
             }
-            return Container;
+            return Tuple.Create(Container, SQLcontainer);
         }
 
         [HttpPost]
-        public void UploadFileToMySQL(string fileName, string email, string uniqueName)
+        public string FileExist(string filename, string email)
         {
             string server = ConfigurationManager.AppSettings["SQLServer"];
             string database = ConfigurationManager.AppSettings["SQLDatabase"];
@@ -73,7 +72,37 @@ namespace BlobTest.Services.Concrete
             MySqlConnection conn = new MySqlConnection(connectionString);
             if (conn.State != ConnectionState.Open)
                 conn.Open();
-            string sql = $"INSERT INTO `file`(`filename`, `email`, `savename`) VALUES ('{fileName}', '{email}', '{uniqueName}')";
+            string sql = $"SELECT `savename` FROM `file` WHERE `filename` = '{filename}' AND `email` = '{email}'";
+            MySqlCommand cmd = new MySqlCommand(sql, conn);
+            MySqlDataReader reader = cmd.ExecuteReader();
+            if (reader.HasRows)
+            {
+                reader.Read();
+                return reader.GetString(0);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        [HttpPost]
+        public void UploadFileToMySQL(string fileName, string email, string uniqueName, int SQLcontainer)
+        {
+            string server = ConfigurationManager.AppSettings["SQLServer"];
+            string database = ConfigurationManager.AppSettings["SQLDatabase"];
+            string userId = ConfigurationManager.AppSettings["SQLUserId"];
+            string password = ConfigurationManager.AppSettings["SQLPassword"];
+
+
+            string connectionString = $"server={server};" +
+                                      $"port=3306;user id={userId};" +
+                                      $"password={password};" +
+                                      $"database={database};";
+            MySqlConnection conn = new MySqlConnection(connectionString);
+            if (conn.State != ConnectionState.Open)
+                conn.Open();
+            string sql = $"INSERT INTO `file`(`filename`, `email`, `savename`, `Container`) VALUES ('{fileName}', '{email}', '{uniqueName}', '{SQLcontainer}')";
             MySqlCommand cmd = new MySqlCommand(sql, conn);
             int index = cmd.ExecuteNonQuery();
             if (index > 0)
@@ -97,7 +126,7 @@ namespace BlobTest.Services.Concrete
             }
         }
 
-        public async Task<bool> CompareSHA(string SHA, BlobContainerClient containerClient)
+        public async Task<string> CompareSHA(string SHA, BlobContainerClient containerClient)
         {
             foreach (BlobItem blobItem in containerClient.GetBlobs())
             {
@@ -116,14 +145,62 @@ namespace BlobTest.Services.Concrete
                     {
                         if(value == SHA)
                         {
-                            return true;
+                            return blobItem.Name;
                         }
                     }
                 }
             }
-            return false;
+            return null;
         }
 
+        /*public async Task UploadFileAsync(HttpPostedFileBase file, HttpContextBase httpContext)
+        {
+            string email = httpContext.Session["email"] as string;
+            string password = httpContext.Session["password"] as string;
+            if (email == null || password == null)
+            {
+                return;
+            }
+            string uniqueName = FileExist(file.FileName, email);
+            if (uniqueName == null)
+            {
+                string fileExtension = Path.GetExtension(file.FileName);
+                Tuple<string, int> result = SetContainer(fileExtension);
+                string Container = result.Item1;
+                int SQLcontainer = result.Item2;
+                string ConnectionString = ConfigurationManager.AppSettings["AzureConnectionString"];
+                uniqueName = Guid.NewGuid().ToString() + fileExtension;
+                BlobServiceClient blobServiceClient = new BlobServiceClient(ConnectionString);
+                BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(Container);
+                string SHA = ComputeSHA2Hash(file);
+                Task<string> SHAexist = CompareSHA(SHA, containerClient);
+                if (await SHAexist != null)
+                {
+                    UploadFileToMySQL(file.FileName, email, SHAexist.Result, SQLcontainer);
+                    Console.WriteLine("File content exist!!!");
+                }
+                else
+                {
+                    using (Stream fileStream = file.InputStream)
+                    {
+                        var response = await containerClient.UploadBlobAsync(uniqueName, fileStream);
+                    }
+                    var blobClient = containerClient.GetBlobClient(uniqueName);
+
+                    IDictionary<string, string> metadata = new Dictionary<string, string>
+                    {
+                        { "SHA", SHA }
+                    };
+
+                    await blobClient.SetMetadataAsync(metadata);
+                    UploadFileToMySQL(file.FileName, email, uniqueName, SQLcontainer);
+                }
+            }
+            else
+            {
+                Console.WriteLine("file exist!!");
+            }
+        }*/
         public async Task UploadFileAsync(HttpPostedFileBase file, HttpContextBase httpContext)
         {
             string fileExtension = Path.GetExtension(file.FileName);
@@ -133,15 +210,18 @@ namespace BlobTest.Services.Concrete
             {
                 return;
             }
-            string Container = SetContainer(fileExtension);
+            Tuple<string, int> result = SetContainer(fileExtension);
+            string Container = result.Item1;
+            int SQLcontainer = result.Item2;
             string ConnectionString = ConfigurationManager.AppSettings["AzureConnectionString"];
             var uniqueName = Guid.NewGuid().ToString() + fileExtension;
             BlobServiceClient blobServiceClient = new BlobServiceClient(ConnectionString);
             BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(Container);
             string SHA = ComputeSHA2Hash(file);
-            Task<bool> SHAexist = CompareSHA(SHA, containerClient);
-            if(await SHAexist)
+            Task<string> SHAexist = CompareSHA(SHA, containerClient);
+            if(await SHAexist != null)
             {
+                UploadFileToMySQL(file.FileName, email, SHAexist.Result, SQLcontainer);
                 Console.WriteLine("File content exist!!!");
             }
             else
@@ -158,7 +238,7 @@ namespace BlobTest.Services.Concrete
                 };
 
                 await blobClient.SetMetadataAsync(metadata);
-                UploadFileToMySQL(file.FileName, email, uniqueName);
+                UploadFileToMySQL(file.FileName, email, uniqueName, SQLcontainer);
             }
         }
     }

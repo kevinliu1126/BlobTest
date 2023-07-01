@@ -8,6 +8,8 @@ using BlobTest.Models;
 using System.Threading.Tasks;
 using System.Net;
 using System.IO;
+using System.Drawing.Drawing2D;
+using System.Web.Helpers;
 
 namespace BlobTest.Controllers
 {
@@ -77,6 +79,22 @@ namespace BlobTest.Controllers
             }
         }
 
+        public ActionResult Logout()
+        {
+            HttpContextBase httpContext = ControllerContext.HttpContext;
+            string email = httpContext.Session["email"] as string;
+            string password = httpContext.Session["password"] as string;
+            if (email == null || password == null)
+            {
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                httpContext.Session.Abandon();
+                return RedirectToAction("Index");
+            }
+        }
+
         public ActionResult Upload()
         {
             HttpContextBase httpContext = ControllerContext.HttpContext;
@@ -92,6 +110,24 @@ namespace BlobTest.Controllers
                 var model = new UploadFileModel();
                 return View(model);
             }
+        }
+
+        public ActionResult CheckFileExistence(string filename)
+        {
+            HttpContextBase httpContext = ControllerContext.HttpContext;
+            string email = httpContext.Session["email"] as string;
+            string password = httpContext.Session["password"] as string;
+            int? permission = (int?)httpContext.Session["permission"];
+            if (email == null || password == null || permission == null)
+            {
+                return RedirectToAction("Index");
+            }
+            else
+            { 
+                string fileExists = _uploadService.FileExist(filename, email);
+                return Json(new { exists = fileExists });
+            }
+                
         }
 
         public async Task<ActionResult> SaveData(UploadFileModel fileModel)
@@ -110,8 +146,17 @@ namespace BlobTest.Controllers
             }
             else
             {
-                await _uploadService.UploadFileAsync(fileModel.File, httpContext);
-                return RedirectToAction("Upload");
+                string FileExist = _uploadService.FileExist(fileModel.File.FileName, email);
+                if(FileExist == null)
+                {
+                    await _uploadService.UploadFileAsync(fileModel.File, httpContext);
+                    return RedirectToAction("Upload");
+                }
+                else
+                {
+                    
+                    return RedirectToAction("Upload");
+                }
             }
         }
 
@@ -186,6 +231,29 @@ namespace BlobTest.Controllers
                 _deleteService.DeleteFileSQL(save);
                 return RedirectToAction("ViewFile");
             }
+        }
+
+        public ActionResult AzureManagement()
+        {
+            HttpContextBase httpContext = ControllerContext.HttpContext;
+            string email = httpContext.Session["email"] as string;
+            string password = httpContext.Session["password"] as string;
+            int? permission = (int?)httpContext.Session["permission"];
+            if (email == null || password == null || permission != 1)
+            {
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                ViewBag.Files = _getfileService.GetFiles((int)permission, httpContext);
+                return View();
+            }
+            
+        }
+
+        public ActionResult SelectContainer()
+        {
+            return RedirectToAction("AzureManagement");
         }
     }
 }
