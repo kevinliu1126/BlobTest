@@ -26,6 +26,7 @@
             @Html.LabelFor(m => m.FileDetails, new { @class = "form-control" })
             <div class="upload-form">
                 <input type="file" name="File" class="form-control" />
+                <input type="hidden" id="ExtraValue" name="ExtraValue" value="" />
             </div>
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
@@ -46,10 +47,12 @@
                 type: 'POST',
                 data: { fileName: fileName },
             });
-
+            var extraValue = response.exists;
+            var extraInput = document.getElementById("ExtraValue");
             if (response.exists != null) {
                 var confirmed = confirm('文件已存在，是否覆盖？');
                 if (confirmed) {
+                    extraInput.value = extraValue;
                     event.target.submit(); // 提交表单
                 }
             } else {

@@ -130,7 +130,7 @@ namespace BlobTest.Controllers
                 
         }
 
-        public async Task<ActionResult> SaveData(UploadFileModel fileModel)
+        public async Task<ActionResult> SaveData(UploadFileModel fileModel, string ExtraValue)
         {
             HttpContextBase httpContext = ControllerContext.HttpContext;
             string email = httpContext.Session["email"] as string;
@@ -146,15 +146,14 @@ namespace BlobTest.Controllers
             }
             else
             {
-                string FileExist = _uploadService.FileExist(fileModel.File.FileName, email);
-                if(FileExist == null)
+                if(ExtraValue == "")
                 {
                     await _uploadService.UploadFileAsync(fileModel.File, httpContext);
                     return RedirectToAction("Upload");
                 }
                 else
                 {
-                    
+                    await _uploadService.UpdateFileAsync(fileModel.File, ExtraValue, httpContext);
                     return RedirectToAction("Upload");
                 }
             }

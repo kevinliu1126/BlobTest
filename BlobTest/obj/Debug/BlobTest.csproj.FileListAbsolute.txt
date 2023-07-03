@@ -107,7 +107,6 @@ D:\VS_project\BlobTest\BlobTest\bin\System.Runtime.CompilerServices.Unsafe.dll
 D:\VS_project\BlobTest\BlobTest\bin\System.Threading.Tasks.Extensions.dll
 D:\VS_project\BlobTest\BlobTest\bin\System.Web.Http.dll
 D:\VS_project\BlobTest\BlobTest\bin\System.Web.Http.WebHost.dll
-D:\VS_project\BlobTest\BlobTest\bin\BouncyCastle.Crypto.xml
 D:\VS_project\BlobTest\BlobTest\bin\EntityFramework.xml
 D:\VS_project\BlobTest\BlobTest\bin\EntityFramework.SqlServer.xml
 D:\VS_project\BlobTest\BlobTest\bin\Google.Protobuf.pdb
@@ -156,3 +155,7 @@ D:\VS_project\BlobTest\BlobTest\bin\Azure.Storage.Blobs.xml
 D:\VS_project\BlobTest\BlobTest\bin\Azure.Storage.Common.xml
 D:\VS_project\BlobTest\BlobTest\bin\Microsoft.Bcl.AsyncInterfaces.xml
 D:\VS_project\BlobTest\BlobTest\bin\System.Diagnostics.DiagnosticSource.xml
+D:\VS_project\BlobTest\BlobTest\bin\Xceed.Document.NET.dll
+D:\VS_project\BlobTest\BlobTest\bin\Xceed.Words.NET.dll
+D:\VS_project\BlobTest\BlobTest\bin\itextsharp.dll
+D:\VS_project\BlobTest\BlobTest\bin\itextsharp.xml

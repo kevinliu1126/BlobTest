@@ -10,7 +10,8 @@ namespace BlobTest.Services.Abstract
     {
         string FileExist(string filename, string email);
         Task UploadFileAsync(HttpPostedFileBase file, HttpContextBase httpContext);
-        Tuple<string, int> SetContainer(string fileExtension);
-        Task<string> CompareSHA(string SHA, BlobContainerClient containerClient);
+        Task UpdateFileAsync(HttpPostedFileBase file, string filename, HttpContextBase httpContext);
+        Tuple<string, int, byte[]> SetContainer(HttpPostedFileBase file, string fileExtension);
+        Task<string> CompareSHA(string SHA, BlobContainerClient containerClient, string fileExtension);
     }
 }
