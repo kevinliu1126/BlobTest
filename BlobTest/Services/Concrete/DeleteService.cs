@@ -41,9 +41,37 @@ namespace BlobTest.Services.Concrete
             return container;
         }
 
-        public async Task DeleteFileBlob(string filename)
+        public bool HasTwo(string Container, string uniqueName)
         {
-            string container = GetContainername(filename);
+            string server = ConfigurationManager.AppSettings["SQLServer"];
+            string database = ConfigurationManager.AppSettings["SQLDatabase"];
+            string userId = ConfigurationManager.AppSettings["SQLUserId"];
+            string password = ConfigurationManager.AppSettings["SQLPassword"];
+
+
+            string connectionString = $"server={server};" +
+                                      $"port=3306;user id={userId};" +
+                                      $"password={password};" +
+                                      $"database={database};";
+            MySqlConnection conn = new MySqlConnection(connectionString);
+            if (conn.State != ConnectionState.Open)
+                conn.Open();
+            string sql = $"SELECT `filename` from `file` WHERE `savename` = '{uniqueName}' AND `Container` = '{Container}'";
+            MySqlCommand cmd = new MySqlCommand(sql, conn);
+            using (MySqlDataReader reader = cmd.ExecuteReader())
+            {
+                bool hasRows = reader.HasRows;
+                int rowCount = 0;
+                while (reader.Read())
+                {
+                    rowCount++;
+                }
+                return rowCount >= 2;
+            }
+        }
+
+        public async Task DeleteFileBlob(string container, string filename)
+        {
             // 创建存储账户连接字符串
             string connectionString = ConfigurationManager.AppSettings["AzureConnectionString"];
 
@@ -66,7 +94,7 @@ namespace BlobTest.Services.Concrete
             }
         }
 
-        public void DeleteFileSQL(string filename)
+        public void DeleteFileSQL(string container, string filename)
         {
             string server = ConfigurationManager.AppSettings["SQLServer"];
             string database = ConfigurationManager.AppSettings["SQLDatabase"];
@@ -81,7 +109,7 @@ namespace BlobTest.Services.Concrete
             MySqlConnection conn = new MySqlConnection(connectionString);
             if (conn.State != ConnectionState.Open)
                 conn.Open();
-            string sql = $"DELETE FROM `file` WHERE `savename`='{filename}'";
+            string sql = $"DELETE FROM `file` WHERE `filename` = '{filename}' AND `Container` = '{container}'";
             MySqlCommand cmd = new MySqlCommand(sql, conn);
             int index = cmd.ExecuteNonQuery();
             if (index > 0)
@@ -95,6 +123,14 @@ namespace BlobTest.Services.Concrete
             conn.Close();
         }
 
-
+        public async Task DeleteFile(string fileName, string uniqueName)
+        {
+            string container = GetContainername(fileName);
+            if (!HasTwo(container, uniqueName))
+            {
+                await DeleteFileBlob(container, uniqueName);
+            }
+            DeleteFileSQL(container, fileName);
+        }
     }
 }

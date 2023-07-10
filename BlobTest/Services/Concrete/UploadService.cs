@@ -1,7 +1,6 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using MySql.Data.MySqlClient;
-using BlobTest.Models;
 using BlobTest.Services.Abstract;
 using System.Data;
 using System.Web.Mvc;
@@ -10,27 +9,19 @@ using System;
 using System.Web;
 using System.IO;
 using System.Threading.Tasks;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Collections.Generic;
-using System.Drawing;
-using Xceed.Words.NET;
-using Xceed.Document.NET;
-using System.Web.Optimization;
-using iTextSharp.text.pdf;
-using iTextSharp.text.pdf.parser;
 
 namespace BlobTest.Services.Concrete
 {
     public class UploadService : IUploadService
     {
 
-        public Tuple<string, int, byte[]> SetContainer(HttpPostedFileBase file, string fileExtension)
+        public Tuple<string, int> SetContainer(string fileExtension)
         {
             string Container;
             int SQLcontainer;
-            byte[] fileContent; 
             switch (fileExtension)
             {
                 case ".png":
@@ -38,78 +29,28 @@ namespace BlobTest.Services.Concrete
                 case ".jpeg":
                     Container = "blobcontainer1";
                     SQLcontainer = 1;
-                    fileContent = Readimage(file);
                     break;
                 case ".doc":
                 case ".docx":
-                    Container = "blobcontainer2";
-                    SQLcontainer = 2;
-                    fileContent = ReadDoc(file);
-                    break;
                 case ".pdf":
                     Container = "blobcontainer2";
                     SQLcontainer = 2;
-                    fileContent = ReadPDF(file);
                     break;
                 case ".xls":
                 case ".xlsx":
                     Container = "blobcontainer3";
                     SQLcontainer = 3;
-                    fileContent = Readimage(file);
                     break;
                 case ".json":
                     Container = "blobcontainer4";
                     SQLcontainer = 4;
-                    fileContent = Readimage(file);
                     break;
                 default:
                     Container = "blobcontainer5";
                     SQLcontainer = 5;
-                    string temp = string.Empty;
-
-                    using (StreamReader reader = new StreamReader(file.InputStream))
-                    {
-                        temp = reader.ReadToEnd();
-                    }
-                    fileContent = Encoding.UTF8.GetBytes(temp);
                     break;
             }
-            return Tuple.Create(Container, SQLcontainer, fileContent);
-        }
-
-        public byte[] Readimage(HttpPostedFileBase file)
-        {
-            // 讀取圖片
-            using (System.Drawing.Image image = System.Drawing.Image.FromStream(file.InputStream))
-            {
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    image.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-                    return ms.ToArray();
-                }
-            }
-        }
-
-        public byte[] ReadDoc(HttpPostedFileBase file)
-        {
-            DocX document = DocX.Load(file.InputStream);
-            string text = document.Text;
-            return Encoding.UTF8.GetBytes(text);
-        }
-
-        public byte[] ReadPDF(HttpPostedFileBase file)
-        {
-            string text = "";
-            using (PdfReader reader = new PdfReader(file.InputStream))
-            {
-                
-                for (int page = 1; page <= reader.NumberOfPages; page++)
-                {
-                    string temp = PdfTextExtractor.GetTextFromPage(reader, page);
-                    text += temp;
-                }
-            }
-            return Encoding.UTF8.GetBytes(text);
+            return Tuple.Create(Container, SQLcontainer);
         }
         
         [HttpPost]
@@ -202,23 +143,23 @@ namespace BlobTest.Services.Concrete
             conn.Close();
         }
 
-        public static string ReadFileContent(HttpPostedFileBase file)
+        public static byte[] ReadFileContent(HttpPostedFileBase file)
         {
-            string fileContent = string.Empty;
+            string temp = string.Empty;
 
             using (StreamReader reader = new StreamReader(file.InputStream))
             {
-                fileContent = reader.ReadToEnd();
+                temp = reader.ReadToEnd();
             }
-
-            return fileContent;
+            return Encoding.UTF8.GetBytes(temp);
         }
 
-        public static string CalculateSHA256(byte[] input)
+        public static string CalculateSHA256(HttpPostedFileBase file)
         {
             using (SHA256Managed sha256 = new SHA256Managed())
             {
-                byte[] hashBytes = sha256.ComputeHash(input);
+                byte[] fileContent = ReadFileContent(file);
+                byte[] hashBytes = sha256.ComputeHash(fileContent);
 
                 StringBuilder sb = new StringBuilder();
                 foreach (byte b in hashBytes)
@@ -266,15 +207,14 @@ namespace BlobTest.Services.Concrete
             {
                 return;
             }
-            Tuple<string, int, byte[]> result = SetContainer(file, fileExtension);
+            Tuple<string, int> result = SetContainer(fileExtension);
             string Container = result.Item1;
             int SQLcontainer = result.Item2;
-            byte[] fileContent = result.Item3;
             string ConnectionString = ConfigurationManager.AppSettings["AzureConnectionString"];
             var uniqueName = Guid.NewGuid().ToString() + fileExtension;
             BlobServiceClient blobServiceClient = new BlobServiceClient(ConnectionString);
             BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(Container);
-            string SHA = CalculateSHA256(fileContent);
+            string SHA = CalculateSHA256(file);
             Task<string> SHAexist = CompareSHA(SHA, containerClient, fileExtension);
             if(await SHAexist != null)
             {
@@ -307,15 +247,14 @@ namespace BlobTest.Services.Concrete
             {
                 return;
             }
-            Tuple<string, int, byte[]> result = SetContainer(file, fileExtension);
+            Tuple<string, int> result = SetContainer(fileExtension);
             string Container = result.Item1;
             int SQLcontainer = result.Item2;
-            byte[] fileContent = result.Item3;
             string ConnectionString = ConfigurationManager.AppSettings["AzureConnectionString"];
             BlobServiceClient blobServiceClient = new BlobServiceClient(ConnectionString);
             BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(Container);
             var blobClient = containerClient.GetBlobClient(filename);
-            string SHA = CalculateSHA256(fileContent);
+            string SHA = CalculateSHA256(file);
             Task<string> SHAexist = CompareSHA(SHA, containerClient, fileExtension);
             if (await SHAexist != null)
             {

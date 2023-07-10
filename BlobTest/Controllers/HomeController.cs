@@ -20,14 +20,16 @@ namespace BlobTest.Controllers
         private readonly IGetFileService _getfileService;
         private readonly IDownloadService _downloadService;
         private readonly IDeleteService _deleteService;
+        private readonly ITempService _tempService;
 
-        public HomeController(ILoginService loginService, IUploadService uploadService, IGetFileService getfileService, IDownloadService downloadService, IDeleteService deleteService)
+        public HomeController(ILoginService loginService, IUploadService uploadService, IGetFileService getfileService, IDownloadService downloadService, IDeleteService deleteService, ITempService tempService)
         {
             _loginService = loginService;
             _uploadService = uploadService;
             _getfileService = getfileService;
             _downloadService = downloadService;
             _deleteService = deleteService;
+            _tempService = tempService;
         }
 
         public ActionResult Index()
@@ -123,8 +125,8 @@ namespace BlobTest.Controllers
                 return RedirectToAction("Index");
             }
             else
-            { 
-                string fileExists = _uploadService.FileExist(filename, email);
+            {
+                string fileExists = _tempService.FileExist(filename, email);
                 return Json(new { exists = fileExists });
             }
                 
@@ -148,12 +150,12 @@ namespace BlobTest.Controllers
             {
                 if(ExtraValue == "")
                 {
-                    await _uploadService.UploadFileAsync(fileModel.File, httpContext);
+                    await _tempService.UploadFile(fileModel.File, httpContext);
                     return RedirectToAction("Upload");
                 }
                 else
                 {
-                    await _uploadService.UpdateFileAsync(fileModel.File, ExtraValue, httpContext);
+                    await _tempService.UpdateFile(fileModel.File, ExtraValue, httpContext);
                     return RedirectToAction("Upload");
                 }
             }
@@ -214,7 +216,7 @@ namespace BlobTest.Controllers
             }
         }
 
-        public ActionResult Delete(string save)
+        public async Task<ActionResult> Delete(string file, string save)
         {
             HttpContextBase httpContext = ControllerContext.HttpContext;
             string email = httpContext.Session["email"] as string;
@@ -226,8 +228,7 @@ namespace BlobTest.Controllers
             }
             else
             {
-                _deleteService.DeleteFileBlob(save);
-                _deleteService.DeleteFileSQL(save);
+                await _deleteService.DeleteFile(file, save);
                 return RedirectToAction("ViewFile");
             }
         }
