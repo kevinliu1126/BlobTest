@@ -10,7 +10,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - 我的 ASP.NET 應用程式</title>
+    <title>@ViewBag.Title - MY ASP.NET APP</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
 </head>
@@ -23,7 +23,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                @Html.ActionLink("應用程式名稱", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+                @Html.ActionLink("Blob", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
@@ -46,7 +46,7 @@
         <hr />
         <footer>
             <div class="container">
-                <div style="display:inline-block"><p>&copy; @DateTime.Now.Year - 我的 ASP.NET 應用程式</p></div>
+                <div style="display:inline-block"><p>&copy; @DateTime.Now.Year - MY ASP.NET APP</p></div>
                 @if(email != null && password != null)
                 {
                     <div style="display:inline-block; float:right">@Html.ActionLink("LogOut", "Logout", "Home")</div>

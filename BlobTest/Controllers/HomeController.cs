@@ -193,12 +193,9 @@ namespace BlobTest.Controllers
                 string url = _downloadService.GetDownloadURL(save);
                 string filePath = $@"D:\NJ\file\" + _downloadService.GetContainername(file) + @"\" + file;
 
-                if (!System.IO.File.Exists(filePath))
+                using (WebClient wc = new WebClient())
                 {
-                    using (WebClient wc = new WebClient())
-                    {
-                        wc.DownloadFile(url, filePath);
-                    }
+                    wc.DownloadFile(url, filePath);
                 }
 
                 if (!System.IO.File.Exists(filePath))

@@ -12,6 +12,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using System.Web.UI.WebControls;
 using WebGrease.Activities;
 
 namespace BlobTest.Services.Concrete
@@ -173,6 +174,7 @@ namespace BlobTest.Services.Concrete
             string ConnectionString = ConfigurationManager.AppSettings["AzureConnectionString"];
             BlobServiceClient blobServiceClient = new BlobServiceClient(ConnectionString);
             BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(Container);
+            file.InputStream.Position = 0;
             using (Stream fileStream = file.InputStream)
             {
                 await containerClient.UploadBlobAsync(uniqueName, fileStream);
@@ -250,6 +252,7 @@ namespace BlobTest.Services.Concrete
             BlobServiceClient blobServiceClient = new BlobServiceClient(ConnectionString);
             BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(Container);
             var blobClient = containerClient.GetBlobClient(uniqueName);
+            file.InputStream.Position = 0;
             using (Stream fileStream = file.InputStream)
             {
                 await blobClient.UploadAsync(fileStream, overwrite: true);
@@ -312,9 +315,9 @@ namespace BlobTest.Services.Concrete
             }
             string Container = SetContainer(fileExtension);
             string SHA = CalculateSHA(file);
-            if(HasTwo(Container, uniqueName))
+            string uniqueNameSHA = CompareSHA(SHA, Container);
+            if (HasTwo(Container, uniqueName))
             {
-                string uniqueNameSHA = CompareSHA(SHA, Container);
                 if (uniqueNameSHA != null)
                 {
                     UpdateDataToSQL(file.FileName, email, uniqueNameSHA, SHA, Container);
@@ -328,7 +331,6 @@ namespace BlobTest.Services.Concrete
             }
             else
             {
-                string uniqueNameSHA = CompareSHA(SHA, Container);
                 if (uniqueNameSHA != null)
                 {
                     UpdateDataToSQL(file.FileName, email, uniqueNameSHA, SHA, Container);

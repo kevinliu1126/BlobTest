@@ -159,3 +159,11 @@ D:\VS_project\BlobTest\BlobTest\bin\Xceed.Document.NET.dll
 D:\VS_project\BlobTest\BlobTest\bin\Xceed.Words.NET.dll
 D:\VS_project\BlobTest\BlobTest\bin\itextsharp.dll
 D:\VS_project\BlobTest\BlobTest\bin\itextsharp.xml
+D:\VS_project\BlobTest\BlobTest\bin\System.Memory.Data.dll
+D:\VS_project\BlobTest\BlobTest\bin\System.Text.Encodings.Web.dll
+D:\VS_project\BlobTest\BlobTest\bin\System.Text.Json.dll
+D:\VS_project\BlobTest\BlobTest\bin\System.ValueTuple.dll
+D:\VS_project\BlobTest\BlobTest\bin\System.Memory.Data.xml
+D:\VS_project\BlobTest\BlobTest\bin\System.Text.Encodings.Web.xml
+D:\VS_project\BlobTest\BlobTest\bin\System.Text.Json.xml
+D:\VS_project\BlobTest\BlobTest\bin\System.ValueTuple.xml
