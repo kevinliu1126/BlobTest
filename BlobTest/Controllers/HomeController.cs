@@ -20,16 +20,14 @@ namespace BlobTest.Controllers
         private readonly IGetFileService _getfileService;
         private readonly IDownloadService _downloadService;
         private readonly IDeleteService _deleteService;
-        private readonly ITempService _tempService;
 
-        public HomeController(ILoginService loginService, IUploadService uploadService, IGetFileService getfileService, IDownloadService downloadService, IDeleteService deleteService, ITempService tempService)
+        public HomeController(ILoginService loginService, IUploadService uploadService, IGetFileService getfileService, IDownloadService downloadService, IDeleteService deleteService)
         {
             _loginService = loginService;
             _uploadService = uploadService;
             _getfileService = getfileService;
             _downloadService = downloadService;
             _deleteService = deleteService;
-            _tempService = tempService;
         }
 
         public ActionResult Index()
@@ -126,7 +124,7 @@ namespace BlobTest.Controllers
             }
             else
             {
-                string fileExists = _tempService.FileExist(filename, email);
+                string fileExists = _uploadService.FileExist(filename, email);
                 return Json(new { exists = fileExists });
             }
                 
@@ -150,12 +148,12 @@ namespace BlobTest.Controllers
             {
                 if(ExtraValue == "")
                 {
-                    await _tempService.UploadFile(fileModel.File, httpContext);
+                    await _uploadService.UploadFile(fileModel.File, httpContext);
                     return RedirectToAction("Upload");
                 }
                 else
                 {
-                    await _tempService.UpdateFile(fileModel.File, ExtraValue, httpContext);
+                    await _uploadService.UpdateFile(fileModel.File, ExtraValue, httpContext);
                     return RedirectToAction("Upload");
                 }
             }

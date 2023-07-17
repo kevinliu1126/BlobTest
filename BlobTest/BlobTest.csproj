@@ -255,13 +255,11 @@
     <Compile Include="Services\Abstract\IDownloadService.cs" />
     <Compile Include="Services\Abstract\IGetFileService.cs" />
     <Compile Include="Services\Abstract\ILoginService.cs" />
-    <Compile Include="Services\Abstract\ITempService.cs" />
     <Compile Include="Services\Abstract\IUploadService.cs" />
     <Compile Include="Services\Concrete\DeleteService.cs" />
     <Compile Include="Services\Concrete\DownloadService.cs" />
     <Compile Include="Services\Concrete\GetFileService.cs" />
     <Compile Include="Services\Concrete\LoginService.cs" />
-    <Compile Include="Services\Concrete\TempService.cs" />
     <Compile Include="Services\Concrete\UploadService.cs" />
   </ItemGroup>
   <ItemGroup>
